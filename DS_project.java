@@ -1,133 +1,124 @@
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
-// Node class to represent each event in the AVL Tree
 class EventNode {
-    int timestamp; // Event time (acts as a unique priority)
-    String eventDetails;
-    int height;
-    EventNode left, right;
+    int time_stamp; // Event time
+    String event_Detail;
+    int h;
+    EventNode l, r;
 
-    public EventNode(int timestamp, String eventDetails) {
-        this.timestamp = timestamp;
-        this.eventDetails = eventDetails;
-        this.height = 1;
+    public EventNode(int time_stamp, String event_Detail) {
+        this.time_stamp = time_stamp;
+        this.event_Detail = event_Detail;
+        this.h = 1;
     }
 }
 
-// AVL Tree class to manage event scheduling
 class AVLTree {
     private EventNode root;
 
-    // Utility function to get the height of the node
-    private int height(EventNode N) {
-        return (N == null) ? 0 : N.height;
+    // utility function
+    private int h(EventNode N) {
+        return (N == null) ? 0 : N.h;
     }
 
-    // Right rotation for balancing the AVL tree
-    private EventNode rightRotate(EventNode y) {
-        EventNode x = y.left;
-        EventNode T2 = x.right;
+    private EventNode rRotate(EventNode y) {
+        EventNode x = y.l;
+        EventNode T2 = x.r;
 
         // Perform rotation
-        x.right = y;
-        y.left = T2;
+        x.r = y;
+        y.l = T2;
 
-        // Update heights
-        y.height = Math.max(height(y.left), height(y.right)) + 1;
-        x.height = Math.max(height(x.left), height(x.right)) + 1;
+        // Update hs
+        y.h = Math.max(h(y.l), h(y.r)) + 1;
+        x.h = Math.max(h(x.l), h(x.r)) + 1;
 
-        return x; // new root
+        return x;
     }
 
-    // Left rotation for balancing the AVL tree
-    private EventNode leftRotate(EventNode x) {
-        EventNode y = x.right;
-        EventNode T2 = y.left;
+    private EventNode lRotate(EventNode x) {
+        EventNode y = x.r;
+        EventNode T2 = y.l;
 
-        // Perform rotation
-        y.left = x;
-        x.right = T2;
+        y.l = x;
+        x.r = T2;
 
-        // Update heights
-        x.height = Math.max(height(x.left), height(x.right)) + 1;
-        y.height = Math.max(height(y.left), height(y.right)) + 1;
+        x.h = Math.max(h(x.l), h(x.r)) + 1;
+        y.h = Math.max(h(y.l), h(y.r)) + 1;
 
-        return y; // new root
+        return y;
     }
 
-    // Get the balance factor of node N
-    private int getBalance(EventNode N) {
-        return (N == null) ? 0 : height(N.left) - height(N.right);
+    private int get_bal(EventNode N) {
+        return (N == null) ? 0 : h(N.l) - h(N.r);
     }
 
-    // Insert a new event by timestamp, with duplicate check
-    public boolean insertEvent(int timestamp, String eventDetails) {
-        if (searchEvent(timestamp) != null) {
-            System.out.println("Error: An event with this timestamp already exists.");
-            return false; // Duplicate timestamp found
+    public boolean insertEvent(int time_stamp, String event_Detail) {
+        if (searchEvent(time_stamp) != null) {
+            System.out.println("Error: An event with this time value already Exists.");
+            return false;
         }
-        root = insertEvent(root, timestamp, eventDetails);
+        root = insertEvent(root, time_stamp, event_Detail);
         return true;
     }
 
-    private EventNode insertEvent(EventNode node, int timestamp, String eventDetails) {
+    private EventNode insertEvent(EventNode node, int time_stamp, String event_Detail) {
         if (node == null) {
-            return new EventNode(timestamp, eventDetails);
+            return new EventNode(time_stamp, event_Detail);
         }
 
-        if (timestamp < node.timestamp)
-            node.left = insertEvent(node.left, timestamp, eventDetails);
-        else if (timestamp > node.timestamp)
-            node.right = insertEvent(node.right, timestamp, eventDetails);
+        if (time_stamp < node.time_stamp)
+            node.l = insertEvent(node.l, time_stamp, event_Detail);
+        else if (time_stamp > node.time_stamp)
+            node.r = insertEvent(node.r, time_stamp, event_Detail);
 
-        node.height = 1 + Math.max(height(node.left), height(node.right));
-        int balance = getBalance(node);
+        node.h = 1 + Math.max(h(node.l), h(node.r));
+        int bal = get_bal(node);
 
-        if (balance > 1 && timestamp < node.left.timestamp)
-            return rightRotate(node);
+        if (bal > 1 && time_stamp < node.l.time_stamp)
+            return rRotate(node);
 
-        if (balance < -1 && timestamp > node.right.timestamp)
-            return leftRotate(node);
+        if (bal < -1 && time_stamp > node.r.time_stamp)
+            return lRotate(node);
 
-        if (balance > 1 && timestamp > node.left.timestamp) {
-            node.left = leftRotate(node.left);
-            return rightRotate(node);
+        if (bal > 1 && time_stamp > node.l.time_stamp) {
+            node.l = lRotate(node.l);
+            return rRotate(node);
         }
 
-        if (balance < -1 && timestamp < node.right.timestamp) {
-            node.right = rightRotate(node.right);
-            return leftRotate(node);
+        if (bal < -1 && time_stamp < node.r.time_stamp) {
+            node.r = rRotate(node.r);
+            return lRotate(node);
         }
 
         return node;
     }
 
-    // Delete an event by timestamp
-    public void deleteEvent(int timestamp) {
-        if (timestamp <= 0) {
-            System.out.println("Error: Timestamp must be a positive integer.");
+    public void deleteEvent(int time_stamp) {
+        if (time_stamp <= 0) {
+            System.out.println("Error: Time Value must be a positive Integer.");
             return;
         }
-        if (searchEvent(root, timestamp) == null) {
-            System.out.println("Error: No event found with this timestamp.");
+        if (searchEvent(root, time_stamp) == null) {
+            System.out.println("Error: No event found with this time Value.");
             return;
         }
-        root = deleteNode(root, timestamp);
+        root = deleteNode(root, time_stamp);
         System.out.println("Event deleted successfully.");
     }
 
-    private EventNode deleteNode(EventNode root, int timestamp) {
+    private EventNode deleteNode(EventNode root, int time_stamp) {
         if (root == null)
             return root;
 
-        if (timestamp < root.timestamp)
-            root.left = deleteNode(root.left, timestamp);
-        else if (timestamp > root.timestamp)
-            root.right = deleteNode(root.right, timestamp);
+        if (time_stamp < root.time_stamp)
+            root.l = deleteNode(root.l, time_stamp);
+        else if (time_stamp > root.time_stamp)
+            root.r = deleteNode(root.r, time_stamp);
         else {
-            if ((root.left == null) || (root.right == null)) {
-                EventNode temp = (root.left != null) ? root.left : root.right;
+            if ((root.l == null) || (root.r == null)) {
+                EventNode temp = (root.l != null) ? root.l : root.r;
 
                 if (temp == null) {
                     temp = root;
@@ -135,80 +126,76 @@ class AVLTree {
                 } else
                     root = temp;
             } else {
-                EventNode temp = minValueNode(root.right);
-                root.timestamp = temp.timestamp;
-                root.eventDetails = temp.eventDetails;
-                root.right = deleteNode(root.right, temp.timestamp);
+                EventNode temp = minValueNode(root.r);
+                root.time_stamp = temp.time_stamp;
+                root.event_Detail = temp.event_Detail;
+                root.r = deleteNode(root.r, temp.time_stamp);
             }
         }
 
         if (root == null)
             return root;
 
-        root.height = Math.max(height(root.left), height(root.right)) + 1;
-        int balance = getBalance(root);
+        root.h = Math.max(h(root.l), h(root.r)) + 1;
+        int bal = get_bal(root);
 
-        if (balance > 1 && getBalance(root.left) >= 0)
-            return rightRotate(root);
+        if (bal > 1 && get_bal(root.l) >= 0)
+            return rRotate(root);
 
-        if (balance > 1 && getBalance(root.left) < 0) {
-            root.left = leftRotate(root.left);
-            return rightRotate(root);
+        if (bal > 1 && get_bal(root.l) < 0) {
+            root.l = lRotate(root.l);
+            return rRotate(root);
         }
 
-        if (balance < -1 && getBalance(root.right) <= 0)
-            return leftRotate(root);
+        if (bal < -1 && get_bal(root.r) <= 0)
+            return lRotate(root);
 
-        if (balance < -1 && getBalance(root.right) > 0) {
-            root.right = rightRotate(root.right);
-            return leftRotate(root);
+        if (bal < -1 && get_bal(root.r) > 0) {
+            root.r = rRotate(root.r);
+            return lRotate(root);
         }
 
         return root;
     }
 
-    // Get the smallest timestamp event
     public EventNode getNextEvent() {
         return minValueNode(root);
     }
 
     private EventNode minValueNode(EventNode node) {
         EventNode current = node;
-        while (current != null && current.left != null)
-            current = current.left;
+        while (current != null && current.l != null)
+            current = current.l;
         return current;
     }
 
-    // Search for an event by timestamp
-    public EventNode searchEvent(int timestamp) {
-        return searchEvent(root, timestamp);
+    public EventNode searchEvent(int time_stamp) {
+        return searchEvent(root, time_stamp);
     }
 
-    private EventNode searchEvent(EventNode node, int timestamp) {
-        if (node == null || node.timestamp == timestamp)
+    private EventNode searchEvent(EventNode node, int time_stamp) {
+        if (node == null || node.time_stamp == time_stamp)
             return node;
 
-        if (timestamp < node.timestamp)
-            return searchEvent(node.left, timestamp);
+        if (time_stamp < node.time_stamp)
+            return searchEvent(node.l, time_stamp);
 
-        return searchEvent(node.right, timestamp);
+        return searchEvent(node.r, time_stamp);
     }
 
-    // Print all events (in-order traversal)
     public void printEvents() {
         printEvents(root);
     }
 
-    private void printEvents(EventNode node) {
+    private void printEvents(EventNode node) { //INFO: inOrder
         if (node != null) {
-            printEvents(node.left);
-            System.out.println("Event at " + node.timestamp + ": " + node.eventDetails);
-            printEvents(node.right);
+            printEvents(node.l);
+            System.out.println("Event at " + node.time_stamp + ": " + node.event_Detail);
+            printEvents(node.r);
         }
     }
 }
 
-// Main class to test the AVL Tree based Event Scheduler
 public class DS_project {
     public static void main(String[] args) {
         AVLTree eventTree = new AVLTree();
@@ -229,46 +216,46 @@ public class DS_project {
                 choice = sc.nextInt();
             } catch (InputMismatchException e) {
                 System.out.println("Invalid input. Please enter a valid number.");
-                sc.nextLine(); // Consume invalid input
+                sc.nextLine();
                 continue;
             }
 
-            sc.nextLine(); // Consume newline
+            sc.nextLine();
 
             switch (choice) {
                 case 1:
                     try {
-                        System.out.print("Enter event timestamp (unique positive integer): ");
-                        int timestamp = sc.nextInt();
+                        System.out.print("Enter Event Time_stamp (Unique Positive Integer): ");
+                        int time_stamp = sc.nextInt();
 
-                        if (timestamp <= 0) {
-                            System.out.println("Error: Timestamp must be a positive integer greater than zero.");
+                        if (time_stamp <= 0) {
+                            System.out.println("Error: Time_stamp must be a positive integer greater than zero.");
                             break;
                         }
 
-                        sc.nextLine(); // Consume newline
+                        sc.nextLine();
                         System.out.print("Enter event details: ");
                         String details = sc.nextLine();
 
-                        if (!eventTree.insertEvent(timestamp, details)) {
-                            System.out.println("Event with the same timestamp already exists. Event not added.");
+                        if (!eventTree.insertEvent(time_stamp, details)) {
+                            System.out.println("Event with the same time_stamp already exists. Event not added.");
                         } else {
                             System.out.println("Event added successfully.");
                         }
                     } catch (InputMismatchException e) {
-                        System.out.println("Invalid timestamp. Please enter a valid positive integer.");
-                        sc.nextLine(); // Consume invalid input
+                        System.out.println("Invalid time_stamp. Please enter a valid positive integer.");
+                        sc.nextLine();
                     }
                     break;
 
                 case 2:
                     try {
-                        System.out.print("Enter the timestamp of the event to delete: ");
-                        int deleteTimestamp = sc.nextInt();
-                        eventTree.deleteEvent(deleteTimestamp);
+                        System.out.print("Enter the time_stamp of the event to be Delete: ");
+                        int deleteTime_stamp = sc.nextInt();
+                        eventTree.deleteEvent(deleteTime_stamp);
                     } catch (InputMismatchException e) {
-                        System.out.println("Invalid timestamp. Please enter a valid positive integer.");
-                        sc.nextLine(); // Consume invalid input
+                        System.out.println("Invalid time_stamp. Please enter a valid positive integer.");
+                        sc.nextLine();
                     }
                     break;
 
@@ -276,7 +263,7 @@ public class DS_project {
                     EventNode nextEvent = eventTree.getNextEvent();
                     if (nextEvent != null) {
                         System.out.println("Next upcoming event:");
-                        System.out.println("Event at " + nextEvent.timestamp + ": " + nextEvent.eventDetails);
+                        System.out.println("Event at " + nextEvent.time_stamp + ": " + nextEvent.event_Detail);
                     } else {
                         System.out.println("No events scheduled.");
                     }
@@ -284,23 +271,23 @@ public class DS_project {
 
                 case 4:
                     try {
-                        System.out.print("Enter timestamp of the event to search: ");
-                        int searchTimestamp = sc.nextInt();
+                        System.out.print("Enter time_stamp of the Event to Search: ");
+                        int searchTime_stamp = sc.nextInt();
 
-                        if (searchTimestamp <= 0) {
-                            System.out.println("Error: Timestamp must be a positive integer.");
+                        if (searchTime_stamp <= 0) {
+                            System.out.println("Error: Time Value must be a positive integer.");
                             break;
                         }
 
-                        EventNode searchResult = eventTree.searchEvent(searchTimestamp);
+                        EventNode searchResult = eventTree.searchEvent(searchTime_stamp);
                         if (searchResult != null) {
-                            System.out.println("Event found: " + searchResult.eventDetails);
+                            System.out.println("Event found: " + searchResult.event_Detail);
                         } else {
-                            System.out.println("No event found with the given timestamp.");
+                            System.out.println("No event found with the given time_stamp.");
                         }
                     } catch (InputMismatchException e) {
-                        System.out.println("Invalid timestamp. Please enter a valid positive integer.");
-                        sc.nextLine(); // Consume invalid input
+                        System.out.println("Invalid time_stamp. Please enter a valid positive integer.");
+                        sc.nextLine();
                     }
                     break;
 
